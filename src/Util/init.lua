@@ -77,12 +77,12 @@ Util.SimulationFromPhysicalSimulation = t.wrap(function(physicalSimulation)
 		simulation.SimulationData.AutoTools[autoToolValue.Name] = true
 	end
 
-	simulation.SimulationData.Name = simulationDataFolder:FindFirstChild("Name").Value
+	simulation.SimulationData.Name = string.lower(simulationDataFolder:FindFirstChild("Name").Value)
 	simulation.SimulationData.SimulationType = simulationDataFolder:FindFirstChild("SimulationType").Value
 	simulation.SimulationData.Attribution = simulationDataFolder:FindFirstChild("Attribution").Value
 
 	for _, aliasValue in ipairs(simulationDataFolder:FindFirstChild("Aliases"):GetChildren()) do
-		simulation.SimulationData.Aliases[aliasValue.Name] = true
+		simulation.SimulationData.Aliases[string.lower(aliasValue.Name)] = true
 	end
 
 	simulation.Simulation = simulationModel

@@ -197,7 +197,6 @@ function SimulationLoader:AddSimulation(newSimulation)
 	assert(Util.StructureTypeChecks.Simulation(newSimulation))
 
 	local newSimulationName = newSimulation.SimulationData.Name
-	newSimulationName = string.lower(newSimulationName)
 
 	-- Check if a simulation by that name already exists
 	for simulationName in pairs(self.Simulations) do
@@ -219,13 +218,13 @@ function SimulationLoader:AddSimulation(newSimulation)
 
 	-- Add the simulation and link aliases
 	self.Simulations[newSimulationName] = newSimulation
---    print("SIMULATIONLOADER: Successfully added simulation " .. newSimulationName)
+    print("SIMULATIONLOADER: Successfully added simulation " .. newSimulationName)
 
 	for alias in pairs(newSimulation.SimulationData.Aliases) do
 		alias = string.lower(alias)
 
 		self.AliasMap[alias] = newSimulationName
-	--	print("SIMULATIONLOADER: Got alias " .. alias .. " for simulation " .. newSimulationName)
+		print("SIMULATIONLOADER: Got alias " .. alias .. " for simulation " .. newSimulationName)
 	end
 
 	self.SimulationAddedEvent:Fire(newSimulation.SimulationData)
