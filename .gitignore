@@ -1,0 +1,6 @@
+# builds
+/*.rbxm
+
+# Roblox Studio lock files
+/*.rbxlx.lock
+/*.rbxl.lock

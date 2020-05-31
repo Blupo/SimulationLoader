@@ -1,0 +1,3 @@
+[submodule "t"]
+	path = src/t
+	url = https://github.com/osyrisrblx/t
