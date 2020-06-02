@@ -291,12 +291,13 @@ function SimulationLoader:Load(simulationName)
 	local preLoad, postLoad = simulation.PreLoad, simulation.PostLoad
 
 	self.SimulationLoadingEvent:Fire(simulationData)
-	if preLoad then pcall(preLoad) end
-
+	
 	do
 		local simulationCopy = simulation.Simulation:Clone()
 		local simulationCopyDescendants = simulationCopy:GetDescendants()
 
+		if preLoad then pcall(preLoad) end
+		
 		for _, descendant in ipairs(simulationCopyDescendants) do
 			if descendant:IsA("BaseScript") then
 				descendant.Disabled = true
@@ -319,10 +320,11 @@ function SimulationLoader:Load(simulationName)
 				descendant.Disabled = false
 			end
 		end
+
+		if postLoad then pcall(postLoad, simulationCopy) end
 	end
 
 	self.SimulationLoadedEvent:Fire(simulationData)
-	if postLoad then pcall(postLoad, simulationCopy) end
 
 	self.CurrentSimulation = simulationName
 	self.SimulationIsLoaded = true
@@ -344,12 +346,12 @@ function SimulationLoader:Unload()
 
 	self.SimulationUnloadingEvent:Fire(simulationData)
 	
-
 	-- unload
 	do
 		local simulationCopy = self.SimulationContainer:FindFirstChild("Simulation")
-		if preUnload then pcall(preUnload, simulationCopy) end
 	--	local simulationCopyDescendants = simulationCopy:GetDescendants()
+
+		if preUnload then pcall(preUnload, simulationCopy) end
 
 		--[[
 		-- is this necessary for unloading?
@@ -370,10 +372,11 @@ function SimulationLoader:Unload()
 
 		-- otherwise just clear the simulation container and be done
 		self.SimulationContainer:ClearAllChildren()
+		
+		if postUnload then pcall(postUnload) end
 	end
 
 	self.SimulationUnloadedEvent:Fire(simulationData)
-	if postUnload then pcall(postUnload) end
 
 	self.CurrentSimulation = ""
 	self.SimulationIsLoaded = false
