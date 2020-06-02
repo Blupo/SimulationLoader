@@ -291,7 +291,7 @@ function SimulationLoader:Load(simulationName)
 	local preLoad, postLoad = simulation.PreLoad, simulation.PostLoad
 
 	self.SimulationLoadingEvent:Fire(simulationData)
-	if preLoad then preLoad() end
+	if preLoad then pcall(preLoad) end
 
 	do
 		local simulationCopy = simulation.Simulation:Clone()
@@ -322,7 +322,7 @@ function SimulationLoader:Load(simulationName)
 	end
 
 	self.SimulationLoadedEvent:Fire(simulationData)
-	if postLoad then postLoad() end
+	if postLoad then pcall(postLoad, simulationCopy) end
 
 	self.CurrentSimulation = simulationName
 	self.SimulationIsLoaded = true
@@ -343,11 +343,12 @@ function SimulationLoader:Unload()
 	local preUnload, postUnload = simulation.PreUnload, simulation.PostUnload
 
 	self.SimulationUnloadingEvent:Fire(simulationData)
-	if preUnload then preUnload() end
+	
 
 	-- unload
 	do
 		local simulationCopy = self.SimulationContainer:FindFirstChild("Simulation")
+		if preUnload then pcall(preUnload, simulationCopy) end
 	--	local simulationCopyDescendants = simulationCopy:GetDescendants()
 
 		--[[
@@ -372,7 +373,7 @@ function SimulationLoader:Unload()
 	end
 
 	self.SimulationUnloadedEvent:Fire(simulationData)
-	if postUnload then postUnload() end
+	if postUnload then pcall(postUnload) end
 
 	self.CurrentSimulation = ""
 	self.SimulationIsLoaded = false
