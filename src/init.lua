@@ -2,7 +2,7 @@
 
 	SimulationLoader Reference
 
-	PhysicalSimulation (Folder/Model)
+	PhysicalSimulation (Folder)
 
 		LoadScripts: Folder
 			PreLoad: ModuleScript?

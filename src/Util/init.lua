@@ -33,15 +33,13 @@ Util.StructureTypeChecks.PhysicalSimulation = t.instanceOf("Folder", {
 	}),
 
 	SimulationData = t.instanceOf("Folder", {
-		AutoTools = t.wrap(
-			function(folder) return t.values(t.instanceOf("BoolValue"))(folder:GetChildren()) end,
-			t.instanceOf("Folder")
-		),
+		AutoTools = t.wrap(function(folder)
+			return t.values(t.instanceOf("BoolValue"))(folder:GetChildren())
+		end, t.instanceOf("Folder")),
 
-		Aliases = t.wrap(
-			function(folder) return t.values(t.instanceOf("BoolValue"))(folder:GetChildren()) end,
-			t.instanceOf("Folder")
-		),
+		Aliases = t.wrap(function(folder)
+			return t.values(t.instanceOf("BoolValue"))(folder:GetChildren())
+		end, t.instanceOf("Folder")),
 
 		Name = t.instanceOf("StringValue"),
 		SimulationType = t.instanceOf("StringValue"),
