@@ -2,8 +2,10 @@
   "name": "SimulationLoader",
 
   "tree": {
-    "$path": "src"
+    "$path": "src",
 
-    
+    "t": {
+      "$path": "includes/t/lib"
+    }
   }
 }

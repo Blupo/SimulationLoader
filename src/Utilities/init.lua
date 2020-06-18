@@ -2,11 +2,11 @@ local t = require(script.Parent:FindFirstChild("t"))
 
 ---
 
-local Util = {}
+local Utilities = {}
 
-Util.StructureTypeChecks = {}
+Utilities.StructureTypeChecks = {}
 
-Util.StructureTypeChecks.SimulationData = t.interface({
+Utilities.StructureTypeChecks.SimulationData = t.interface({
 	AutoTools = t.map(t.string, t.literal(true)),
 	Aliases = t.map(t.string, t.literal(true)),
 
@@ -15,8 +15,8 @@ Util.StructureTypeChecks.SimulationData = t.interface({
 	Attribution = t.string,
 })
 
-Util.StructureTypeChecks.Simulation = t.interface({
-	SimulationData = Util.StructureTypeChecks.SimulationData,
+Utilities.StructureTypeChecks.Simulation = t.interface({
+	SimulationData = Utilities.StructureTypeChecks.SimulationData,
 
 	PreLoad = t.optional(t.callback),
 	PostLoad = t.optional(t.callback),
@@ -24,7 +24,7 @@ Util.StructureTypeChecks.Simulation = t.interface({
 	PostUnload = t.optional(t.callback),
 })
 
-Util.StructureTypeChecks.PhysicalSimulation = t.instanceOf("Folder", {
+Utilities.StructureTypeChecks.PhysicalSimulation = t.instanceOf("Folder", {
 	LoadScripts = t.instanceOf("Folder", {
 		PreLoad = t.optional(t.instanceOf("ModuleScript")),
 		PostLoad = t.optional(t.instanceOf("ModuleScript")),
@@ -59,7 +59,7 @@ Util.StructureTypeChecks.PhysicalSimulation = t.instanceOf("Folder", {
 	@return Simulation
 
 --]]
-Util.SimulationFromPhysicalSimulation = t.wrap(function(physicalSimulation)
+Utilities.SimulationFromPhysicalSimulation = t.wrap(function(physicalSimulation)
 	local simulation = {
 		SimulationData = {
 			AutoTools = {},
@@ -98,8 +98,8 @@ Util.SimulationFromPhysicalSimulation = t.wrap(function(physicalSimulation)
 	simulation.PostUnload = postUnloadScript and require(postUnloadScript)
 
 	return simulation
-end, Util.StructureTypeChecks.PhysicalSimulation)
+end, Utilities.StructureTypeChecks.PhysicalSimulation)
 
 ---
 
-return Util
+return Utilities

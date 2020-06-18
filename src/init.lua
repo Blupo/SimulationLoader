@@ -47,8 +47,8 @@
 
 		Callbacks
 
-			LoadAnimation(): () -> boolean
-			UnloadAnimation(): () -> boolean
+			LoadAnimation(simulationCopy: Model, simulationContainer: Model): () -> boolean
+			UnloadAnimation(simulationCopy: Model, simulationContainer: Model): () -> boolean
 
 		Events
 
@@ -71,9 +71,6 @@
 			GetSimulationData(simulationName: string): SimulationData
 			GetAllSimulationsData(): array<SimulationData>
 
-			nil SetAnimatonCallbacks()
-			nil UnsetAnimationCallbacks()
-
 		Properties
 
 			CurrentSimulation: string
@@ -88,7 +85,7 @@
 
 local RunService = game:GetService("RunService")
 
-local Util = require(script:FindFirstChild("Util"))
+local Utilities = require(script:FindFirstChild("Utilities"))
 
 ---
 
@@ -194,7 +191,7 @@ end
 
 --]]
 function SimulationLoader:AddSimulation(newSimulation)
-	assert(Util.StructureTypeChecks.Simulation(newSimulation))
+	assert(Utilities.StructureTypeChecks.Simulation(newSimulation))
 
 	local newSimulationName = newSimulation.SimulationData.Name
 
@@ -238,7 +235,7 @@ end
 
 --]]
 function SimulationLoader:AddPhysicalSimulation(newSimulation)
-	local simulation = Util.SimulationFromPhysicalSimulation(newSimulation)
+	local simulation = Utilities.SimulationFromPhysicalSimulation(newSimulation)
 
 	-- Cannot use : here, need to use . and pass self
 	SimulationLoader.AddSimulation(self, simulation)
