@@ -2,13 +2,24 @@ local t = require(script.Parent:FindFirstChild("t"))
 
 ---
 
+-- converts keys to array items
+local function dictToArray(dict)
+	local array = {}
+
+	for key in pairs(dict) do
+		array[#array + 1] = key
+	end
+
+	return array
+end
+
 local Utilities = {}
 
 Utilities.StructureTypeChecks = {}
 
 Utilities.StructureTypeChecks.SimulationData = t.interface({
-	AutoTools = t.map(t.string, t.literal(true)),
-	Aliases = t.map(t.string, t.literal(true)),
+	AutoTools = t.array(t.string),
+	Aliases = t.array(t.string),
 
 	Name = t.string,
 	SimulationType = t.string,
@@ -22,6 +33,8 @@ Utilities.StructureTypeChecks.Simulation = t.interface({
 	PostLoad = t.optional(t.callback),
 	PreUnload = t.optional(t.callback),
 	PostUnload = t.optional(t.callback),
+
+	Simulation = t.instanceOf("Model"),
 })
 
 Utilities.StructureTypeChecks.PhysicalSimulation = t.instanceOf("Folder", {
@@ -71,16 +84,30 @@ Utilities.SimulationFromPhysicalSimulation = t.wrap(function(physicalSimulation)
 	local simulationDataFolder = physicalSimulation:FindFirstChild("SimulationData")
 	local simulationModel = physicalSimulation:FindFirstChild("Simulation")
 
-	for _, autoToolValue in pairs(simulationDataFolder:FindFirstChild("AutoTools"):GetChildren()) do
-		simulation.SimulationData.AutoTools[autoToolValue.Name] = true
+	-- construct auto tools list
+	do
+		local uniqueAutoToolsMap = {}
+
+		for _, autoToolValue in pairs(simulationDataFolder:FindFirstChild("AutoTools"):GetChildren()) do
+			uniqueAutoToolsMap[autoToolValue.Name] = true
+		end
+
+		simulation.SimulationData.AutoTools = dictToArray(uniqueAutoToolsMap)
 	end
 
 	simulation.SimulationData.Name = string.lower(simulationDataFolder:FindFirstChild("Name").Value)
 	simulation.SimulationData.SimulationType = simulationDataFolder:FindFirstChild("SimulationType").Value
 	simulation.SimulationData.Attribution = simulationDataFolder:FindFirstChild("Attribution").Value
 
-	for _, aliasValue in ipairs(simulationDataFolder:FindFirstChild("Aliases"):GetChildren()) do
-		simulation.SimulationData.Aliases[string.lower(aliasValue.Name)] = true
+	-- construct alias list
+	do
+		local uniqueAliasMap = {}
+
+		for _, aliasValue in ipairs(simulationDataFolder:FindFirstChild("Aliases"):GetChildren()) do
+			uniqueAliasMap[string.lower(aliasValue.Name)] = true
+		end
+
+		simulation.SimulationData.Aliases = dictToArray(uniqueAliasMap)
 	end
 
 	simulation.Simulation = simulationModel

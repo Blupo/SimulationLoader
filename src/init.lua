@@ -2,88 +2,83 @@
 
 	SimulationLoader Reference
 
-	PhysicalSimulation (Folder)
+	Data Structures
 
-		LoadScripts: Folder
-			PreLoad: ModuleScript?
-			PostLoad: ModuleScript?
-			PreUnload: ModuleScript?
-			PostUnload: ModuleScript?
-		SimulationData: Folder
-			AutoTools: Folder<BoolValue>
-			Aliases: Folder<BoolValue>
+		PhysicalSimulation: Folder = {
+			LoadScripts: Folder
+				PreLoad: ModuleScript?
+				PostLoad: ModuleScript?
+				PreUnload: ModuleScript?
+				PostUnload: ModuleScript?
+			SimulationData: Folder
+				AutoTools: Folder<BoolValue>
+				Aliases: Folder<BoolValue>
 
-			Name: StringValue
-			SimulationType: StringValue
-			Attribution: StringValue
-		Simulation: Model
+				Name: StringValue
+				SimulationType: StringValue
+				Attribution: StringValue
+			Simulation: Model
+		}
 
-	SimulationData (structure)
+		SimulationData = {
+			Name: string,
+			SimulationType: string,
+			Attribution: string,
 
-		Properties
+			AutoTools: array<string>,
+			Aliases: array<string>
+		}
 
-			Name: string
-			SimulationType: string
-			Attribution: string
+		Simulation = {
+			SimulationData: SimulationData,
 
-			AutoTools: dictionary<string, boolean>
-			Aliases: dictionary<string, boolean>
-
-	Simulation (structure)
-
-		Properties
-
-			SimulationData: SimulationData
-			AutoTools: dictionary<string, boolean>
-
-			PreLoad: function?
-			PostLoad: function?
-			PreUnload: function?
-			PostUnload: function?
+			PreLoad: function?,
+			PostLoad: function?,
+			PreUnload: function?,
+			PostUnload: function?,
 
 			Simulation: Model
+		}
 
-	SimulationLoader (class)
+	SimulationLoader
 
 		Callbacks
 
-			LoadAnimation(simulationCopy: Model, simulationContainer: Model): () -> boolean
-			UnloadAnimation(simulationCopy: Model, simulationContainer: Model): () -> boolean
+			SimulationLoader.LoadAnimation(simulationCopy: Model, simulationContainer: Model, doneEvent: BindableEvent): nil
+			SimulationLoader.UnloadAnimation(simulationCopy: Model, simulationContainer: Model, doneEvent: BindableEvent): nil
 
 		Events
 
-			SimulationLoading(SimulationData)
-			SimulationUnloading(SimulationData)
-			SimulationLoaded(SimulationData)
-			SimulationUnloaded(SimulationData)
+			SimulationLoader.SimulationLoading(simulationData: SimulationData)
+			SimulationLoader.SimulationUnloading(simulationData: SimulationData)
+			SimulationLoader.SimulationLoaded(simulationData: SimulationData)
+			SimulationLoader.SimulationUnloaded(simulationData: SimulationData)
 
-			SimulationAdded(SimulationData)
+			SimulationLoader.SimulationAdded(simulationData: SimulationData)
 
 		Functions
 
-			AddSimulation(newSimulation: Simulation): nil
-			AddPhysicalSimulation(physicalSimulation: PhysicalSimulation): nil
+			SimulationLoader.AddSimulation(newSimulation: Simulation): nil
+			SimulationLoader.AddPhysicalSimulation(physicalSimulation: PhysicalSimulation): nil
 
-			Load(simulationName: string): nil
-			Unload(): nil
+			SimulationLoader.Load(simulationName: string): nil
+			SimulationLoader.Unload(): nil
 
-			ResolveSimulationName(simulationName: string): string
-			GetSimulationData(simulationName: string): SimulationData
-			GetAllSimulationsData(): array<SimulationData>
+			SimulationLoader.ResolveSimulationName(simulationName: string): string?
+			SimulationLoader.GetSimulationData(simulationName: string): SimulationData?
+			SimulationLoader.GetAllSimulationsData(): array<SimulationData>
 
 		Properties
 
-			CurrentSimulation: string
-			SimulationContainer: Model
-			Simulations: array<Simulation>
-			AliasMap: dictionary<string, string>
+			SimulationLoader.CurrentSimulation: string
+			SimulationLoader.SimulationContainer: Model
+			SimulationLoader.Simulations: array<Simulation>
+			SimulationLoader.AliasMap: dictionary<string, string>
 
-			SimulationIsLoaded: string
-			IsWorking: string
+			SimulationLoader.SimulationIsLoaded: boolean
+			SimulationLoader.IsWorking: boolean
 
 --]]
-
-local RunService = game:GetService("RunService")
 
 local Utilities = require(script:FindFirstChild("Utilities"))
 
@@ -217,7 +212,7 @@ function SimulationLoader:AddSimulation(newSimulation)
 	self.Simulations[newSimulationName] = newSimulation
     print("SIMULATIONLOADER: Successfully added simulation " .. newSimulationName)
 
-	for alias in pairs(newSimulation.SimulationData.Aliases) do
+	for _, alias in pairs(newSimulation.SimulationData.Aliases) do
 		alias = string.lower(alias)
 
 		self.AliasMap[alias] = newSimulationName
@@ -246,7 +241,7 @@ end
 	Attempts to find the corresponding simulation name give a string
 
 	@param string
-	@return string The actual name of the simulation
+	@return string? The actual name of the simulation
 
 --]]
 function SimulationLoader:ResolveSimulationName(rawSimulationName)
@@ -288,13 +283,13 @@ function SimulationLoader:Load(simulationName)
 	local preLoad, postLoad = simulation.PreLoad, simulation.PostLoad
 
 	self.SimulationLoadingEvent:Fire(simulationData)
-	
+
 	do
 		local simulationCopy = simulation.Simulation:Clone()
 		local simulationCopyDescendants = simulationCopy:GetDescendants()
 
 		if preLoad then pcall(preLoad) end
-		
+
 		for _, descendant in ipairs(simulationCopyDescendants) do
 			if descendant:IsA("BaseScript") then
 				descendant.Disabled = true
@@ -303,10 +298,12 @@ function SimulationLoader:Load(simulationName)
 
 		local loadAnimationCallback = self.LoadAnimation
 		if loadAnimationCallback then
-			-- play the animation and wait until it's done
-			local isDone = loadAnimationCallback(simulationCopy, self.SimulationContainer)
+			local doneEvent = Instance.new("BindableEvent")
 
-			repeat RunService.Heartbeat:Wait() until isDone()
+			loadAnimationCallback(simulationCopy, self.SimulationContainer, doneEvent)
+
+			doneEvent.Event:Wait()
+			doneEvent:Destroy()
 		end
 
 		-- otherwise just move the simulation to the container and be done
@@ -342,7 +339,7 @@ function SimulationLoader:Unload()
 	local preUnload, postUnload = simulation.PreUnload, simulation.PostUnload
 
 	self.SimulationUnloadingEvent:Fire(simulationData)
-	
+
 	-- unload
 	do
 		local simulationCopy = self.SimulationContainer:FindFirstChild("Simulation")
@@ -361,15 +358,17 @@ function SimulationLoader:Unload()
 
 		local unloadAnimationCallback = self.UnloadAnimation
 		if unloadAnimationCallback then
-			-- play the animation and wait until it's done
-			local isDone = unloadAnimationCallback(simulationCopy, self.SimulationContainer)
+			local doneEvent = Instance.new("BindableEvent")
 
-			repeat RunService.Heartbeat:Wait() until isDone()
+			unloadAnimationCallback(simulationCopy, self.SimulationContainer, doneEvent)
+
+			doneEvent.Event:Wait()
+			doneEvent:Destroy()
 		end
 
 		-- otherwise just clear the simulation container and be done
 		self.SimulationContainer:ClearAllChildren()
-		
+
 		if postUnload then pcall(postUnload) end
 	end
 
@@ -385,7 +384,7 @@ end
 	Returns the SimulationData for a particular Simulation
 
 	@param string The name of the simulation, case in-sensitive
-	@return SimulationData
+	@return SimulationData?
 
 --]]
 function SimulationLoader:GetSimulationData(simulationName)
