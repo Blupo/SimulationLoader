@@ -345,31 +345,35 @@ function SimulationLoader:Unload()
 		local simulationCopy = self.SimulationContainer:FindFirstChild("Simulation")
 	--	local simulationCopyDescendants = simulationCopy:GetDescendants()
 
-		if preUnload then pcall(preUnload, simulationCopy) end
+		if simulationCopy then
+			if preUnload then pcall(preUnload, simulationCopy) end
 
-		--[[
-		-- is this necessary for unloading?
-		for _, descendant in ipairs(simulationCopyDescendants) do
-			if descendant:IsA("BaseScript") then
-				descendant.Disabled = true
+			--[[
+			-- is this necessary for unloading?
+			for _, descendant in ipairs(simulationCopyDescendants) do
+				if descendant:IsA("BaseScript") then
+					descendant.Disabled = true
+				end
 			end
+			--]]
+
+			local unloadAnimationCallback = self.UnloadAnimation
+			if unloadAnimationCallback then
+				local doneEvent = Instance.new("BindableEvent")
+
+				unloadAnimationCallback(simulationCopy, self.SimulationContainer, doneEvent)
+
+				doneEvent.Event:Wait()
+				doneEvent:Destroy()
+			end
+
+			-- otherwise just clear the simulation container and be done
+			self.SimulationContainer:ClearAllChildren()
+
+			if postUnload then pcall(postUnload) end
+		else
+			warn("SIMULATIONLOADER: The loaded simulation seems to have disappeared...")
 		end
-		--]]
-
-		local unloadAnimationCallback = self.UnloadAnimation
-		if unloadAnimationCallback then
-			local doneEvent = Instance.new("BindableEvent")
-
-			unloadAnimationCallback(simulationCopy, self.SimulationContainer, doneEvent)
-
-			doneEvent.Event:Wait()
-			doneEvent:Destroy()
-		end
-
-		-- otherwise just clear the simulation container and be done
-		self.SimulationContainer:ClearAllChildren()
-
-		if postUnload then pcall(postUnload) end
 	end
 
 	self.SimulationUnloadedEvent:Fire(simulationData)
