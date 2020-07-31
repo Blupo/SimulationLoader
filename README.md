@@ -1,15 +1,15 @@
 # SimulationLoader
 
-SimulationLoader is an object for making loading simulations easier, originally designed for group "holo"s.
+SimulationLoader is a system for loading maps as discrete units called Simulations. It was originally created for [Crylox Legion](https://www.roblox.com/groups/1192846)'s [Zerion holo](https://www.roblox.com/games/3717455865).
 
-Please read the [wiki](https://github.com/Crylox-Legion/SimulationLoader/wiki) to get started with using SimulationLoader.
+Please read the [wiki](https://github.com/Blupo/SimulationLoader/wiki) for getting started with using SimulationLoader.
 
 ## API
 
 ### Data Structures
 
 #### PhysicalSimulation
-See https://github.com/Crylox-Legion/SimulationLoader/wiki/Creating-Physical-Simulations for constructing physical simulations.
+See [this page](https://github.com/Blupo/SimulationLoader/wiki/Creating-Physical-Simulations) for constructing physical simulations.
 
 ```
 Root: Folder
@@ -100,7 +100,7 @@ Simulation = {
 - `SimulationLoader.AddSimulation(newSimulation: Simulation): nil`
   - Add a simulation. Unless you're creating a simulation purely from Lua (and maybe some JSON), you should create a physical simulation and add that instead.
 - `SimulationLoader.AddPhysicalSimulation(physicalSimulation: PhysicalSimulation): nil`
-  - Add a [physical simulation](https://github.com/Crylox-Legion/SimulationLoader/wiki/Creating-Physical-Simulations).
+  - Add a [physical simulation](https://github.com/Blupo/SimulationLoader/wiki/Creating-Physical-Simulations).
 
 - `SimulationLoader.Load(simulationName: string): nil`
   - Load a simulation. This internally uses `SimulationLoader.ResolveSimulationName` to find the simulation name so you don't need to do it before-hand.
